@@ -3,6 +3,8 @@ package it2c.nogra.rhuas;
 import java.util.Scanner;
 
 public class IT2CNOGRARHUAS {
+    
+      private final config conf = new config();
 
     public void addPatients() {
         Scanner sc = new Scanner(System.in);
@@ -18,7 +20,22 @@ public class IT2CNOGRARHUAS {
         String sql = "INSERT INTO patients (p_name, p_lname, p_email, p_appointmentdate) VALUES (?, ?, ?, ?)";
         conf.addRecord(sql, fname, lname, email, adate);
     }
+     private void viewPatients() {
+        String patientsQuery = "SELECT * FROM patients";
+        String[] patientsHeaders = {"ID", "First Name", "Last Name", "Email", "Appointment Date"};
+        String[] patientsColumns = {"p_id", "p_name", "p_lname", "p_email", "p_appointmentdate"};
 
+        conf.viewRecords(patientsQuery, patientsHeaders, patientsColumns);
+    }
+     
+     private void deletePatient() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter Patient ID to delete:");
+        int patientId = sc.nextInt();
+        String sql = "DELETE FROM patients WHERE p_id = ?";
+        conf.deleteRecord(sql, String.valueOf(patientId));
+    }
+     
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         IT2CNOGRARHUAS demo = new IT2CNOGRARHUAS();
@@ -39,7 +56,14 @@ public class IT2CNOGRARHUAS {
                     demo.addPatients();
                     
                     break;
+                case 2:
+                    demo.viewPatients();
+                    break;
                
+                    
+                case 4:
+                    demo.deletePatient();
+                    break;
                 case 5:
                     System.exit(0);
                     break;
