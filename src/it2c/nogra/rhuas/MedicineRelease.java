@@ -66,7 +66,7 @@ public class MedicineRelease {
             }
         } else {
             System.out.println("Invalid input, please enter a number.");
-            sc.next(); // clear the invalid input
+            sc.next(); 
         }
     }
     return action;
@@ -82,7 +82,7 @@ public class MedicineRelease {
         System.out.print("Enter the ID of the Patient: ");
         int pid = getValidPatientId(sc, conf);
 
-        // Only display medicines that are in stock
+        
         String msql = "SELECT med_id, m_name, m_stocks FROM medicines WHERE m_stocks > 0";
         System.out.println("Available Medicines:");
         System.out.printf("%-10s %-30s %-10s%n", "ID", "Medicine Name", "Stock");
@@ -95,7 +95,7 @@ public class MedicineRelease {
         System.out.print("Enter quantity to release: ");
         int quantity = getValidQuantity(sc, conf, mid);
 
-        sc.nextLine(); // consume the newline
+        sc.nextLine(); 
 
         System.out.print("Enter the release date (YYYY-MM-DD): ");
         String releaseDate = getValidReleaseDate(sc);
@@ -106,7 +106,7 @@ public class MedicineRelease {
         String medReleaseQry = "INSERT INTO medicinerelease (p_id, med_id, quantity, m_release, m_status) VALUES (?, ?, ?, ?, ?)";
         conf.addRecord(medReleaseQry, Integer.toString(pid), Integer.toString(mid), Integer.toString(quantity), releaseDate, status);
 
-        // Update the stock in medicines table
+        
         String updateStockQry = "UPDATE medicines SET m_stocks = m_stocks - ? WHERE med_id = ?";
         conf.updateRecord(updateStockQry, Integer.toString(quantity), Integer.toString(mid));
 
@@ -220,7 +220,7 @@ public class MedicineRelease {
         System.out.print("Enter new quantity: ");
         int quantity = getValidQuantity(sc, conf, releaseId);
 
-        sc.nextLine(); // consume the newline
+        sc.nextLine(); 
 
         System.out.print("Enter new release date (YYYY-MM-DD): ");
         String releaseDate = getValidReleaseDate(sc);

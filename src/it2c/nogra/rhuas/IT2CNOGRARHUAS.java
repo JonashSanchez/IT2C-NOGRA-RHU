@@ -54,7 +54,7 @@ public class IT2CNOGRARHUAS {
 
                 case 5:
                     Reports reports = new Reports();
-reports.showReports();
+                    reports.showReports();
                     
                     
                     break;

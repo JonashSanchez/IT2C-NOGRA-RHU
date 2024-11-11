@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class Reports {
 
-    // Method to generate reports
+    
     public void showReports() {
         Scanner sc = new Scanner(System.in);
         String response;
@@ -25,7 +25,7 @@ public class Reports {
 
             switch (action) {
                 case 1:
-                    r.generatePatientReport(sc); // Pass the scanner to the method
+                    r.generatePatientReport(sc); 
                     break;
                 case 2:
                     r.generateGeneralReport();
@@ -51,31 +51,31 @@ public class Reports {
                 }
             } else {
                 System.out.println("Invalid input, please enter a number.");
-                sc.next(); // clear the invalid input
+                sc.next(); 
             }
         }
         return action;
     }
 
-    // Generate a report for a specific patient
+    
     private void generatePatientReport(Scanner sc) {
-        // Query to view all patients
+       
         String qry = "SELECT p_id, p_name, p_lname, p_email, p_contact FROM patients";
         String[] headers = {"Patient ID", "First Name", "Last Name", "Email", "Contact Number"};
         String[] columns = {"p_id", "p_name", "p_lname", "p_email", "p_contact"};
         config conf = new config();
         
-        // Display all patients
+        
         conf.viewRecords(qry, headers, columns);
 
-        // Get valid patient ID
+       
         int patientId = getValidPatientId(sc, conf);
 
-        // Now generate and show the report for the selected patient
+        
         showSelectedPatientReport(patientId);
     }
 
-    // Validate patient ID to ensure it exists in the database
+   
     private int getValidPatientId(Scanner sc, config conf) {
         int pid;
         String sql = "SELECT COUNT(*) FROM patients WHERE p_id = ?";
@@ -90,13 +90,13 @@ public class Reports {
                 }
             } else {
                 System.out.println("Invalid input, please enter a number.");
-                sc.next(); // clear the invalid input
+                sc.next(); 
             }
         }
         return pid;
     }
 
-    // Show the report for the selected patient
+    
     private void showSelectedPatientReport(int patientId) {
         String qry = "SELECT patients.p_id, patients.p_name, patients.p_lname, patients.p_email, patients.p_contact, "
                 + "appointment.a_id, appointment.a_date, appointment.a_purpose, appointment.a_status, "
@@ -121,28 +121,32 @@ public class Reports {
         conf.viewRecords(qry, headers, columns);
     }
 
-    // Generate a general report for all records in the database
+    
     private void generateGeneralReport() {
-        // General query to select all records from all relevant tables
-        String qry = "SELECT patients.p_id, patients.p_name, patients.p_lname, patients.p_email, patients.p_contact, "
-                + "appointment.a_id, appointment.a_date, appointment.a_purpose, appointment.a_status, "
-                + "medicinerelease.mr_id, medicinerelease.med_id, medicinerelease.quantity, medicinerelease.m_release, medicinerelease.m_status "
-                + "FROM patients "
-                + "LEFT JOIN appointment ON patients.p_id = appointment.p_id "
-                + "LEFT JOIN medicinerelease ON patients.p_id = medicinerelease.p_id";
+    String qry = "SELECT patients.p_id, patients.p_name, patients.p_lname, patients.p_email, patients.p_contact, "
+            + "GROUP_CONCAT(DISTINCT appointment.a_id) as appointment_ids, GROUP_CONCAT(DISTINCT appointment.a_date) as appointment_dates, "
+            + "GROUP_CONCAT(DISTINCT appointment.a_purpose) as appointment_purposes, GROUP_CONCAT(DISTINCT appointment.a_status) as appointment_statuses, "
+            + "GROUP_CONCAT(DISTINCT medicinerelease.mr_id) as release_ids, GROUP_CONCAT(DISTINCT medicinerelease.med_id) as medicine_ids, "
+            + "GROUP_CONCAT(DISTINCT medicinerelease.quantity) as quantities, GROUP_CONCAT(DISTINCT medicinerelease.m_release) as release_dates, "
+            + "GROUP_CONCAT(DISTINCT medicinerelease.m_status) as medicine_statuses "
+            + "FROM patients "
+            + "LEFT JOIN appointment ON patients.p_id = appointment.p_id "
+            + "LEFT JOIN medicinerelease ON patients.p_id = medicinerelease.p_id "
+            + "GROUP BY patients.p_id, patients.p_name, patients.p_lname, patients.p_email, patients.p_contact";
 
-        String[] headers = {
-                "Patient ID", "First Name", "Last Name", "Email", "Contact Number",
-                "Appointment ID", "Appointment Date", "Purpose", "Status",
-                "Release ID", "Medicine ID", "Quantity", "Release Date", "Medicine Status"
-        };
-        String[] columns = {
-                "p_id", "p_name", "p_lname", "p_email", "p_contact",
-                "a_id", "a_date", "a_purpose", "a_status",
-                "mr_id", "med_id", "quantity", "m_release", "m_status"
-        };
+    String[] headers = {
+            "Patient ID", "First Name", "Last Name", "Email", "Contact Number",
+            "Appointment IDs", "Appointment Dates", "Appointment Purposes", "Appointment Statuses",
+            "Release IDs", "Medicine IDs", "Quantities", "Release Dates", "Medicine Statuses"
+    };
+    String[] columns = {
+            "p_id", "p_name", "p_lname", "p_email", "p_contact",
+            "appointment_ids", "appointment_dates", "appointment_purposes", "appointment_statuses",
+            "release_ids", "medicine_ids", "quantities", "release_dates", "medicine_statuses"
+    };
 
-        config conf = new config();
-        conf.viewRecords(qry, headers, columns);
-    }
+    config conf = new config();
+    conf.viewRecords(qry, headers, columns);
+}
+
 }
