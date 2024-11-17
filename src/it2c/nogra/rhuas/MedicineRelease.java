@@ -53,25 +53,24 @@ public class MedicineRelease {
         } while (response.equalsIgnoreCase("yes"));
     }
 
-   private int getValidAction(Scanner sc, int min, int max) {
-    int action;
-    while (true) {
-        System.out.println("Enter Selection:");
-        if (sc.hasNextInt()) {
-            action = sc.nextInt();
-            if (action >= min && action <= max) {
-                break;
+    private int getValidAction(Scanner sc, int min, int max) {
+        int action;
+        while (true) {
+            System.out.println("Enter Selection:");
+            if (sc.hasNextInt()) {
+                action = sc.nextInt();
+                if (action >= min && action <= max) {
+                    break;
+                } else {
+                    System.out.println("Invalid selection, please enter a number between " + min + " and " + max + ".");
+                }
             } else {
-                System.out.println("Invalid selection, please enter a number between " + min + " and " + max + ".");
+                System.out.println("Invalid input, please enter a number.");
+                sc.next();
             }
-        } else {
-            System.out.println("Invalid input, please enter a number.");
-            sc.next(); 
         }
+        return action;
     }
-    return action;
-}
-
 
     private void addMedRelease() {
         Scanner sc = new Scanner(System.in);
@@ -82,7 +81,6 @@ public class MedicineRelease {
         System.out.print("Enter the ID of the Patient: ");
         int pid = getValidPatientId(sc, conf);
 
-        
         String msql = "SELECT med_id, m_name, m_stocks FROM medicines WHERE m_stocks > 0";
         System.out.println("Available Medicines:");
         System.out.printf("%-10s %-30s %-10s%n", "ID", "Medicine Name", "Stock");
@@ -95,7 +93,7 @@ public class MedicineRelease {
         System.out.print("Enter quantity to release: ");
         int quantity = getValidQuantity(sc, conf, mid);
 
-        sc.nextLine(); 
+        sc.nextLine();
 
         System.out.print("Enter the release date (YYYY-MM-DD): ");
         String releaseDate = getValidReleaseDate(sc);
@@ -106,7 +104,6 @@ public class MedicineRelease {
         String medReleaseQry = "INSERT INTO medicinerelease (p_id, med_id, quantity, m_release, m_status) VALUES (?, ?, ?, ?, ?)";
         conf.addRecord(medReleaseQry, Integer.toString(pid), Integer.toString(mid), Integer.toString(quantity), releaseDate, status);
 
-        
         String updateStockQry = "UPDATE medicines SET m_stocks = m_stocks - ? WHERE med_id = ?";
         conf.updateRecord(updateStockQry, Integer.toString(quantity), Integer.toString(mid));
 
@@ -177,10 +174,10 @@ public class MedicineRelease {
             date = sc.nextLine();
             try {
                 LocalDate releaseDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
-                if (releaseDate.isAfter(LocalDate.now())) {
+                if (!releaseDate.isBefore(LocalDate.now())) {
                     break;
                 } else {
-                    System.out.println("Release date must be in the future. Valid Format (YYYY-MM-DD):");
+                    System.out.println("Release date must be today or in the future. Valid Format (YYYY-MM-DD):");
                 }
             } catch (DateTimeParseException e) {
                 System.out.println("Please enter a valid date (YYYY-MM-DD):");
@@ -217,10 +214,19 @@ public class MedicineRelease {
         System.out.print("Enter the ID of the medicine release record to update: ");
         int releaseId = getValidReleaseId(sc, conf);
 
-        System.out.print("Enter new quantity: ");
-        int quantity = getValidQuantity(sc, conf, releaseId);
+        String msql = "SELECT med_id, m_name, m_stocks FROM medicines WHERE m_stocks > 0";
+        System.out.println("Available Medicines:");
+        System.out.printf("%-10s %-30s %-10s%n", "ID", "Medicine Name", "Stock");
+        System.out.println("-------------------------------------------");
+        conf.viewRecords(msql, new String[]{"ID", "Medicine Name", "Stock"}, new String[]{"med_id", "m_name", "m_stocks"});
 
-        sc.nextLine(); 
+        System.out.print("Enter the ID of the Medicine: ");
+        int mid = getValidMedicineId(sc, conf);
+
+        System.out.print("Enter new quantity: ");
+        int quantity = getValidQuantity(sc, conf, mid);
+
+        sc.nextLine();
 
         System.out.print("Enter new release date (YYYY-MM-DD): ");
         String releaseDate = getValidReleaseDate(sc);
@@ -228,8 +234,8 @@ public class MedicineRelease {
         System.out.print("Enter new status (medicine not released/medicine released/pending): ");
         String status = getValidStatus(sc);
 
-        String updateQry = "UPDATE medicinerelease SET quantity = ?, m_release = ?, m_status = ? WHERE mr_id = ?";
-        conf.updateRecord(updateQry, Integer.toString(quantity), releaseDate, status, Integer.toString(releaseId));
+        String updateQry = "UPDATE medicinerelease SET med_id = ?, quantity = ?, m_release = ?, m_status = ? WHERE mr_id = ?";
+        conf.updateRecord(updateQry, Integer.toString(mid), Integer.toString(quantity), releaseDate, status, Integer.toString(releaseId));
 
         System.out.println("Medicine release record updated successfully!");
     }

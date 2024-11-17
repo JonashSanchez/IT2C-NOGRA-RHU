@@ -9,14 +9,16 @@ public class IT2CNOGRARHUAS {
         Scanner sc = new Scanner(System.in);
         boolean exit = true;
         do {
-            System.out.println("WELCOME TO RHU APPOINTMENT");
-            System.out.println("");
+            System.out.println("\n###########################");
+            System.out.println("# WELCOME TO RHU APPOINTMENT #");
+            System.out.println("###########################");
             System.out.println("1. PATIENT");
             System.out.println("2. MEDICINE");
             System.out.println("3. RHU APPOINTMENT");
             System.out.println("4. MEDICINE RELEASE");
             System.out.println("5. REPORTS");
             System.out.println("6. EXIT");
+            System.out.println("\n---------------------------");
 
             int action = 0;
             while (true) {
@@ -27,8 +29,9 @@ public class IT2CNOGRARHUAS {
                         break;
                     }
                 }
-                sc.nextLine(); 
+                sc.nextLine();
                 System.out.println("Invalid selection. Please enter a number between 1 and 6.");
+                System.out.println("\n---------------------------");
             }
 
             switch (action) {
@@ -55,16 +58,16 @@ public class IT2CNOGRARHUAS {
                 case 5:
                     Reports reports = new Reports();
                     reports.showReports();
-                    
-                    
                     break;
 
                 case 6:
+                    System.out.println("\n---------------------------");
                     System.out.println("Exit Selected...type 'yes' to continue");
                     String resp = sc.next();
                     if (resp.equalsIgnoreCase("yes")) {
                         exit = false;
                     }
+                    System.out.println("\n---------------------------");
                     break;
             }
         } while (exit);

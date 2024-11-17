@@ -22,6 +22,7 @@ public class Appointment {
             System.out.println("3. UPDATE APPOINTMENT");
             System.out.println("4. DELETE APPOINTMENT");
             System.out.println("5. EXIT");
+            System.out.println("\n----------------------");
 
             int act = getValidAction(sc, 1, 5);
 
@@ -48,6 +49,7 @@ public class Appointment {
                 case 5:
                     break;
             }
+            System.out.println("\n----------------------");
             System.out.println("Do you want to continue? (yes/no)");
             response = sc.next();
         } while (response.equalsIgnoreCase("yes"));
@@ -66,7 +68,7 @@ public class Appointment {
                 }
             } else {
                 System.out.println("Invalid input, please enter a number.");
-                sc.next(); 
+                sc.next();
             }
         }
         return action;
@@ -103,7 +105,7 @@ public class Appointment {
 
     private int getValidPatientId(Scanner sc, config conf) {
         int pid;
-        String sql = "SELECT p_id FROM patients WHERE p_id = ? ";
+        String sql = "SELECT p_id FROM patients WHERE p_id = ?";
         while (true) {
             if (sc.hasNextInt()) {
                 pid = sc.nextInt();
@@ -132,7 +134,7 @@ public class Appointment {
                     System.out.println("Appointment date must be in the future. Please enter a valid date (YYYY-MM-DD):");
                 }
             } catch (DateTimeParseException e) {
-                System.out.println(" Please enter a valid date (YYYY-MM-DD):");
+                System.out.println("Invalid date format. Please enter a valid date (YYYY-MM-DD):");
             }
         }
         return date;

@@ -11,8 +11,9 @@ public class Patient {
         Scanner sc = new Scanner(System.in);
         String response;
         do {
-            System.out.println("\n----------------------");
-            System.out.println("PATIENT PANEL");
+            System.out.println("\n######################");
+            System.out.println("#    PATIENT PANEL   #");
+            System.out.println("######################");
             System.out.println("1. ADD PATIENT");
             System.out.println("2. VIEW PATIENT");
             System.out.println("3. UPDATE PATIENT");
@@ -66,6 +67,8 @@ public class Patient {
         config conf = new config();
 
         String fname, lname, email, adate;
+        
+        System.out.println("\n----------------------");
         while (true) {
             System.out.println("First Name:");
             fname = sc.next();
@@ -74,7 +77,8 @@ public class Patient {
             }
             System.out.println("Invalid input. First name should only contain letters.");
         }
-
+        
+        System.out.println("\n----------------------");
         while (true) {
             System.out.println("Last Name:");
             lname = sc.next();
@@ -84,6 +88,7 @@ public class Patient {
             System.out.println("Invalid input. Last name should only contain letters.");
         }
 
+        System.out.println("\n----------------------");
         while (true) {
             System.out.println("Email:");
             email = sc.next();
@@ -93,6 +98,7 @@ public class Patient {
             System.out.println("Invalid input. Email should be in the format 'example@gmail.com'.");
         }
 
+        System.out.println("\n----------------------");
         while (true) {
             System.out.println("Contact Number:");
             adate = sc.next();
@@ -114,62 +120,84 @@ public class Patient {
         conf.viewRecords(patientsQuery, patientsHeaders, patientsColumns);
     }
 
-    private void updatePatient() {
-        Scanner sc = new Scanner(System.in);
-        config conf = new config();
-        System.out.println("Enter Patient ID:");
-        int id = sc.nextInt();
+   private void updatePatient() {
+    Scanner sc = new Scanner(System.in);
+    config conf = new config();
+    
+    System.out.println("\n----------------------");
+    int id = getValidPatientId(sc, conf);
+    
+    String ufname, ulname, uemail, udate;
 
-        while (conf.getSingleValue("SELECT p_id FROM patients WHERE p_id=?", id) == 0) {
-            System.out.println("Selected ID doesn't exist.");
-            System.out.println("Select Patient ID Again:");
-            id = sc.nextInt();
+    System.out.println("\n----------------------");
+    while (true) {
+        System.out.println("Enter the new first name:");
+        ufname = sc.next();
+        if (ufname.matches("[a-zA-Z]+")) {
+            break;
         }
-
-        String ufname, ulname, uemail, udate;
-        while (true) {
-            System.out.println("Enter the new first name:");
-            ufname = sc.next();
-            if (ufname.matches("[a-zA-Z]+")) {
-                break;
-            }
-            System.out.println("Invalid input. First name should only contain letters.");
-        }
-
-        while (true) {
-            System.out.println("Enter the new last name:");
-            ulname = sc.next();
-            if (ulname.matches("[a-zA-Z]+")) {
-                break;
-            }
-            System.out.println("Invalid input. Last name should only contain letters.");
-        }
-
-        while (true) {
-            System.out.println("Enter the new email:");
-            uemail = sc.next();
-            if (uemail.matches("\\w+@gmail\\.com")) {
-                break;
-            }
-            System.out.println("Invalid input. Email should be in the format 'example@gmail.com'.");
-        }
-
-        while (true) {
-            System.out.println("Enter the new contact number:");
-            udate = sc.next();
-            if (udate.matches("\\d+")) {
-                break;
-            }
-            System.out.println("Invalid input. Contact number should only contain numbers.");
-        }
-
-        String qry = "UPDATE patients SET p_name = ?, p_lname = ?, p_email = ?, p_contact = ? WHERE p_id =?";
-        conf.updateRecord(qry, ufname, ulname, uemail, udate, id);
+        System.out.println("Invalid input. First name should only contain letters.");
     }
+
+    System.out.println("\n----------------------");
+    while (true) {
+        System.out.println("Enter the new last name:");
+        ulname = sc.next();
+        if (ulname.matches("[a-zA-Z]+")) {
+            break;
+        }
+        System.out.println("Invalid input. Last name should only contain letters.");
+    }
+
+    System.out.println("\n----------------------");
+    while (true) {
+        System.out.println("Enter the new email:");
+        uemail = sc.next();
+        if (uemail.matches("\\w+@gmail\\.com")) {
+            break;
+        }
+        System.out.println("Invalid input. Email should be in the format 'example@gmail.com'.");
+    }
+
+    System.out.println("\n----------------------");
+    while (true) {
+        System.out.println("Enter the new contact number:");
+        udate = sc.next();
+        if (udate.matches("\\d+")) {
+            break;
+        }
+        System.out.println("Invalid input. Contact number should only contain numbers.");
+    }
+
+    String qry = "UPDATE patients SET p_name = ?, p_lname = ?, p_email = ?, p_contact = ? WHERE p_id =?";
+    conf.updateRecord(qry, ufname, ulname, uemail, udate, id);
+}
+
+private int getValidPatientId(Scanner sc, config conf) {
+    int id;
+    while (true) {
+        System.out.println("Enter Patient ID:");
+        if (sc.hasNextInt()) {
+            id = sc.nextInt();
+            if (conf.getSingleValue("SELECT p_id FROM patients WHERE p_id=?", id) != 0) {
+                break;
+            } else {
+                System.out.println("Selected ID doesn't exist.");
+            }
+        } else {
+            System.out.println("Invalid input. Please enter a number.");
+            sc.next(); 
+        }
+    }
+    return id;
+}
+
 
     private void deletePatient() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
+        
+        System.out.println("\n----------------------");
         System.out.println("Enter Patient ID to delete:");
         int id = sc.nextInt();
 

@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author Hazel Nogra
+ * @author
  */
 public class Medicine {
 
@@ -15,8 +15,9 @@ public class Medicine {
         Scanner sc = new Scanner(System.in);
         String response;
         do {
-            System.out.println("\n----------------------");
-            System.out.println("MEDICINE PANEL");
+            System.out.println("\n######################");
+            System.out.println("#   MEDICINE PANEL   #");
+            System.out.println("######################");
             System.out.println("1. ADD MEDICINE");
             System.out.println("2. VIEW MEDICINE");
             System.out.println("3. UPDATE MEDICINE");
@@ -55,9 +56,11 @@ public class Medicine {
     private int getValidAction(Scanner sc, int min, int max) {
         int action;
         while (true) {
+            System.out.println("\n----------------------");
             System.out.println("Enter Selection:");
             if (sc.hasNextInt()) {
                 action = sc.nextInt();
+                sc.nextLine(); 
                 if (action >= min && action <= max) {
                     break;
                 } else {
@@ -74,12 +77,18 @@ public class Medicine {
     public void addMedicine() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
-        System.out.println("Medicine Name:");
-        String mname = sc.nextLine();
-        System.out.println("Medicine Indication:");
-        String mindi = sc.nextLine();
+        
+        System.out.println("\n----------------------");
+        String mname = getValidMedicineName(sc, "Medicine Name:");
+        
+        System.out.println("\n----------------------");
+        String mindi = getValidMedicineName(sc, "Medicine Indication:");
+        
+        System.out.println("\n----------------------");
         System.out.println("Expiry (YYYY-MM-DD):");
         String expiry = getValidExpiryDate(sc);
+        
+        System.out.println("\n----------------------");
         System.out.println("Stocks (0 or a positive integer):");
         int stock = getValidStock(sc);
 
@@ -89,15 +98,29 @@ public class Medicine {
         System.out.println("Medicine added successfully!");
     }
 
+    private String getValidMedicineName(Scanner sc, String prompt) {
+        String name;
+        while (true) {
+            System.out.println(prompt);
+            name = sc.nextLine();
+            if (name.matches("[a-zA-Z ]+")) {
+                break;
+            } else {
+                System.out.println("Invalid input. Only letters and spaces are allowed. Please try again.");
+            }
+        }
+        return name;
+    }
+
     private String getValidExpiryDate(Scanner sc) {
         String expiry;
         while (true) {
+            System.out.println("\n----------------------");
             expiry = sc.nextLine();
-            
             try {
                 LocalDate date = LocalDate.parse(expiry, DateTimeFormatter.ISO_LOCAL_DATE);
                 if (!date.isBefore(LocalDate.now())) {
-                    break; // Valid date
+                    break; 
                 } else {
                     System.out.println("Expiry date cannot be in the past. Please enter a valid date (YYYY-MM-DD):");
                 }
@@ -111,9 +134,10 @@ public class Medicine {
     private int getValidStock(Scanner sc) {
         int stock;
         while (true) {
+            System.out.println("\n----------------------");
             if (sc.hasNextInt()) {
                 stock = sc.nextInt();
-                // Allow 0 as valid input and any non-negative integer
+                sc.nextLine(); 
                 if (stock >= 0) {
                     break;
                 } else {
@@ -135,12 +159,16 @@ public class Medicine {
         conf.viewRecords(qry, hrds, clms);
     }
 
+
     private void updateMedicine() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
+        
+        System.out.println("\n----------------------");
         System.out.println("Enter Medicine ID:");
         int id = getValidMedicineId(sc, conf);
 
+        System.out.println("\n----------------------");
         System.out.println("Enter the new stock (0 or a positive integer):");
         int stock = getValidStock(sc);
 
@@ -153,6 +181,8 @@ public class Medicine {
     private void deleteMedicine() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
+        
+        System.out.println("\n----------------------");
         System.out.println("Enter Medicine ID to delete:");
         int id = getValidMedicineId(sc, conf);
 
@@ -165,8 +195,10 @@ public class Medicine {
     private int getValidMedicineId(Scanner sc, config conf) {
         int id;
         while (true) {
+            System.out.println("\n----------------------");
             if (sc.hasNextInt()) {
                 id = sc.nextInt();
+                sc.nextLine(); 
                 if (conf.getSingleValue("SELECT med_id FROM medicines WHERE med_id = ?", id) != 0) {
                     break;
                 } else {
