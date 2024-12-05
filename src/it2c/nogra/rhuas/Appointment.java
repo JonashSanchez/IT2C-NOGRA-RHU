@@ -134,7 +134,7 @@ public class Appointment {
                     System.out.println("Appointment date must be in the future. Please enter a valid date (YYYY-MM-DD):");
                 }
             } catch (DateTimeParseException e) {
-                System.out.println("Invalid date format. Please enter a valid date (YYYY-MM-DD):");
+                System.out.println("Please enter a valid date (YYYY-MM-DD):");
             }
         }
         return date;
@@ -163,9 +163,9 @@ public class Appointment {
         while (true) {
             status = sc.nextLine().trim().toLowerCase();
             if (status.equals("pending") || status.equals("done")) {
-                break; // Valid status
+                break; 
             } else {
-                System.out.println("Invalid status. Please enter either 'pending' or 'done':");
+                System.out.println("Please enter either 'pending' or 'done':");
             }
         }
         return status;

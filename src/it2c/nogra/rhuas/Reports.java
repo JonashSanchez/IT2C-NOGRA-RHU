@@ -1,5 +1,6 @@
 package it2c.nogra.rhuas;
 
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,9 +33,10 @@ public class Reports {
                     break;
                 case 3:
                     break;
-            }
-            System.out.println("Do you want to continue? (yes/no)");
-            response = sc.next();
+             }
+            System.out.println("\n---------------------------");
+            response = getValidYesNoResponse(sc, "Do you want to continue? (yes/no)");
+            System.out.println("\n---------------------------");
         } while (response.equalsIgnoreCase("yes"));
     }
 
@@ -56,13 +58,30 @@ public class Reports {
         }
         return action;
     }
+    
+    
+     private String getValidYesNoResponse(Scanner sc, String prompt) {
+        String response;
+        while (true) {
+            System.out.println(prompt);
+            response = sc.next();
+            if (response.equalsIgnoreCase("yes") || response.equalsIgnoreCase("no")) {
+                break;
+            } else {
+                System.out.println("\n---------------------------");
+                System.out.println("Invalid input, please enter 'yes' or 'no'.");
+                System.out.println("\n---------------------------");
+            }
+        }
+        return response;
+    }
 
     
     private void generatePatientReport(Scanner sc) {
        
-        String qry = "SELECT p_id, p_name, p_lname, p_email, p_contact FROM patients";
-        String[] headers = {"Patient ID", "First Name", "Last Name", "Email", "Contact Number"};
-        String[] columns = {"p_id", "p_name", "p_lname", "p_email", "p_contact"};
+        String qry = "SELECT p_id, p_name, p_lname FROM patients";
+        String[] headers = {"Patient ID", "First Name", "Last Name"};
+        String[] columns = {"p_id", "p_name", "p_lname"};
         config conf = new config();
         
         
@@ -97,56 +116,60 @@ public class Reports {
     }
 
     
-    private void showSelectedPatientReport(int patientId) {
-        String qry = "SELECT patients.p_id, patients.p_name, patients.p_lname, patients.p_email, patients.p_contact, "
-                + "appointment.a_id, appointment.a_date, appointment.a_purpose, appointment.a_status, "
-                + "medicinerelease.mr_id, medicinerelease.med_id, medicinerelease.quantity, medicinerelease.m_release, medicinerelease.m_status "
-                + "FROM patients "
-                + "LEFT JOIN appointment ON patients.p_id = appointment.p_id "
-                + "LEFT JOIN medicinerelease ON patients.p_id = medicinerelease.p_id "
-                + "WHERE patients.p_id = " + patientId;
-        
-        String[] headers = {
-                "Patient ID", "First Name", "Last Name", "Email", "Contact Number",
-                "Appointment ID", "Appointment Date", "Purpose", "Status",
-                "Release ID", "Medicine ID", "Quantity", "Release Date", "Medicine Status"
-        };
-        String[] columns = {
-                "p_id", "p_name", "p_lname", "p_email", "p_contact",
-                "a_id", "a_date", "a_purpose", "a_status",
-                "mr_id", "med_id", "quantity", "m_release", "m_status"
-        };
-        
-        config conf = new config();
-        conf.viewRecords(qry, headers, columns);
+  private void showSelectedPatientReport(int patientId) {
+    config conf = new config();
+
+   
+    String patientQuery = "SELECT p_id, p_name, p_lname, p_email, p_contact FROM patients WHERE p_id = ?";
+    try (Connection conn = config.connectDB();
+         PreparedStatement pstmt = conn.prepareStatement(patientQuery)) {
+        pstmt.setInt(1, patientId);
+        try (ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                System.out.println("\n====================== PATIENT INFORMATION ======================");
+                System.out.printf("Patient ID : %d%n", rs.getInt("p_id"));
+                System.out.printf("First Name : %s%n", rs.getString("p_name"));
+                System.out.printf("Last Name  : %s%n", rs.getString("p_lname"));
+                System.out.printf("Email      : %s%n", rs.getString("p_email"));
+                System.out.printf("Contact No : %s%n", rs.getString("p_contact"));
+                System.out.println("===============================================================");
+            }
+        }
+    } catch (SQLException e) {
+        System.out.println("Error fetching patient information: " + e.getMessage());
     }
 
     
-    private void generateGeneralReport() {
-    String qry = "SELECT patients.p_id, patients.p_name, patients.p_lname, patients.p_email, patients.p_contact, "
-            + "GROUP_CONCAT(DISTINCT appointment.a_id) as appointment_ids, GROUP_CONCAT(DISTINCT appointment.a_date) as appointment_dates, "
-            + "GROUP_CONCAT(DISTINCT appointment.a_purpose) as appointment_purposes, GROUP_CONCAT(DISTINCT appointment.a_status) as appointment_statuses, "
-            + "GROUP_CONCAT(DISTINCT medicinerelease.mr_id) as release_ids, GROUP_CONCAT(DISTINCT medicinerelease.med_id) as medicine_ids, "
-            + "GROUP_CONCAT(DISTINCT medicinerelease.quantity) as quantities, GROUP_CONCAT(DISTINCT medicinerelease.m_release) as release_dates, "
-            + "GROUP_CONCAT(DISTINCT medicinerelease.m_status) as medicine_statuses "
-            + "FROM patients "
-            + "LEFT JOIN appointment ON patients.p_id = appointment.p_id "
-            + "LEFT JOIN medicinerelease ON patients.p_id = medicinerelease.p_id "
-            + "GROUP BY patients.p_id, patients.p_name, patients.p_lname, patients.p_email, patients.p_contact";
+    String appointmentQuery = "SELECT a_id, a_date, a_purpose, a_status FROM appointment WHERE p_id = ?";
+    String[] appointmentHeaders = {"Appointment ID", "Appointment Date", "Purpose", "Status"};
+    String[] appointmentColumns = {"a_id", "a_date", "a_purpose", "a_status"};
 
-    String[] headers = {
-            "Patient ID", "First Name", "Last Name", "Email", "Contact Number",
-            "Appointment IDs", "Appointment Dates", "Appointment Purposes", "Appointment Statuses",
-            "Release IDs", "Medicine IDs", "Quantities", "Release Dates", "Medicine Statuses"
-    };
-    String[] columns = {
-            "p_id", "p_name", "p_lname", "p_email", "p_contact",
-            "appointment_ids", "appointment_dates", "appointment_purposes", "appointment_statuses",
-            "release_ids", "medicine_ids", "quantities", "release_dates", "medicine_statuses"
-    };
+    System.out.println("\n====================== APPOINTMENT DETAILS ======================");
+    conf.viewRecords(appointmentQuery.replace("?", String.valueOf(patientId)), appointmentHeaders, appointmentColumns);
 
+   
+     String medicineQuery = "SELECT mr_id, med_id, quantity, m_release, m_status FROM medicinerelease WHERE a_id IN (SELECT a_id FROM appointment WHERE p_id = ?)";
+    String[] medicineHeaders = {"Release ID", "Medicine ID", "Quantity", "Release Date", "Medicine Status"};
+    String[] medicineColumns = {"mr_id", "med_id", "quantity", "m_release", "m_status"};
+
+    System.out.println("\n====================== MEDICINE RELEASE DETAILS ======================");
+    conf.viewRecords(medicineQuery.replace("?", String.valueOf(patientId)), medicineHeaders, medicineColumns);
+}
+
+
+
+    
+  private void generateGeneralReport() {
+    String qry = "SELECT p_id, p_name, p_lname FROM patients";
+    String[] headers = {"Patient ID", "First Name", "Last Name"};
+    String[] columns = {"p_id", "p_name", "p_lname"};
+    
     config conf = new config();
+    
+    System.out.println("\n====================== GENERAL REPORT ======================");
     conf.viewRecords(qry, headers, columns);
+    System.out.println("===========================================================");
 }
 
 }
+ 

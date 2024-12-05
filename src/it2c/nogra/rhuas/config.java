@@ -21,6 +21,10 @@ public class config {
         }
         return con;
     }
+
+    static Connection getConnection() {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
   
    public void addRecord(String sql, String... values) {
         try (Connection conn = this.connectDB(); 
@@ -183,6 +187,10 @@ public void deleteRecord(String sql, Object... values) {
             System.out.println("Error retrieving single value: " + e.getMessage());
         }
         return result;
+    }
+
+    void viewRecords(String appointmentQuery, String[] appointmentHeaders, String[] appointmentColumns, int patientId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

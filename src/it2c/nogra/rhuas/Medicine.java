@@ -48,8 +48,9 @@ public class Medicine {
                 case 5:
                     break;
             }
-            System.out.println("Do you want to continue? (yes/no)");
-            response = sc.next();
+            System.out.println("\n---------------------------");
+            response = getValidYesNoResponse(sc, "Do you want to continue? (yes/no)");
+            System.out.println("\n---------------------------");
         } while (response.equalsIgnoreCase("yes"));
     }
 
@@ -72,6 +73,22 @@ public class Medicine {
             }
         }
         return action;
+    }
+    
+     private String getValidYesNoResponse(Scanner sc, String prompt) {
+        String response;
+        while (true) {
+            System.out.println(prompt);
+            response = sc.next();
+            if (response.equalsIgnoreCase("yes") || response.equalsIgnoreCase("no")) {
+                break;
+            } else {
+                System.out.println("\n---------------------------");
+                System.out.println("Invalid input, please enter 'yes' or 'no'.");
+                System.out.println("\n---------------------------");
+            }
+        }
+        return response;
     }
 
     public void addMedicine() {

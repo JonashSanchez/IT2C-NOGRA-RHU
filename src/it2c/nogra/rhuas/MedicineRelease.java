@@ -1,5 +1,9 @@
 package it2c.nogra.rhuas;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -13,7 +17,6 @@ public class MedicineRelease {
 
     public void mRelease() {
         Scanner sc = new Scanner(System.in);
-        String response;
         do {
             System.out.println("\n----------------------");
             System.out.println("MEDICINE RELEASE PANEL");
@@ -25,32 +28,30 @@ public class MedicineRelease {
 
             int act = getValidAction(sc, 1, 5);
 
-            MedicineRelease mr = new MedicineRelease();
-
             switch (act) {
                 case 1:
-                    mr.addMedRelease();
-                    mr.viewMedRelease();
+                    addMedRelease();
+                    viewMedRelease();
                     break;
                 case 2:
-                    mr.viewMedRelease();
+                    viewMedRelease();
                     break;
                 case 3:
-                    mr.viewMedRelease();
-                    mr.updateMedRelease();
-                    mr.viewMedRelease();
+                    viewMedRelease();
+                    updateMedRelease();
+                    viewMedRelease();
                     break;
                 case 4:
-                    mr.viewMedRelease();
-                    mr.deleteMedRelease();
-                    mr.viewMedRelease();
+                    viewMedRelease();
+                    deleteMedRelease();
+                    viewMedRelease();
                     break;
                 case 5:
-                    break;
+                    return;
             }
+
             System.out.println("Do you want to continue? (yes/no)");
-            response = sc.next();
-        } while (response.equalsIgnoreCase("yes"));
+        } while (getYesNoResponse(sc));
     }
 
     private int getValidAction(Scanner sc, int min, int max) {
@@ -72,61 +73,75 @@ public class MedicineRelease {
         return action;
     }
 
-    private void addMedRelease() {
-        Scanner sc = new Scanner(System.in);
-        config conf = new config();
+  private void addMedRelease() {
+    Scanner sc = new Scanner(System.in);
+    config conf = new config();
 
-        Patient cs = new Patient();
-        cs.viewPatients();
-        System.out.print("Enter the ID of the Patient: ");
-        int pid = getValidPatientId(sc, conf);
+    
+    System.out.println("Available Appointments:");
+    String appointmentQuery = "SELECT a_id, p_id, a_date, a_purpose, a_status FROM appointment";
+    String[] appointmentHeaders = {"Appointment ID", "Patient ID", "Date", "Purpose", "Status"};
+    String[] appointmentColumns = {"a_id", "p_id", "a_date", "a_purpose", "a_status"};
+    conf.viewRecords(appointmentQuery, appointmentHeaders, appointmentColumns);
 
-        String msql = "SELECT med_id, m_name, m_stocks FROM medicines WHERE m_stocks > 0";
-        System.out.println("Available Medicines:");
-        System.out.printf("%-10s %-30s %-10s%n", "ID", "Medicine Name", "Stock");
-        System.out.println("-------------------------------------------");
-        conf.viewRecords(msql, new String[]{"ID", "Medicine Name", "Stock"}, new String[]{"med_id", "m_name", "m_stocks"});
+    
+    System.out.print("Enter the ID of the Appointment: ");
+    int appointmentId = getValidAppointmentId(sc, conf);
 
-        System.out.print("Enter the ID of the Medicine: ");
-        int mid = getValidMedicineId(sc, conf);
+    
+    String medicineQuery = "SELECT med_id, m_name, m_stocks FROM medicines WHERE m_stocks > 0";
+    System.out.println("Available Medicines:");
+    System.out.printf("%-10s %-30s %-10s%n", "Medicine ID", "Medicine Name", "Stock");
+    System.out.println("-------------------------------------------");
+    conf.viewRecords(medicineQuery, new String[]{"Medicine ID", "Medicine Name", "Stock"}, new String[]{"med_id", "m_name", "m_stocks"});
 
-        System.out.print("Enter quantity to release: ");
-        int quantity = getValidQuantity(sc, conf, mid);
+    
+    System.out.print("Enter the ID of the Medicine: ");
+    int medicineId = getValidMedicineId(sc, conf);
 
-        sc.nextLine();
+    
+    System.out.print("Enter quantity to release: ");
+    int quantity = getValidQuantity(sc, conf, medicineId);
 
-        System.out.print("Enter the release date (YYYY-MM-DD): ");
-        String releaseDate = getValidReleaseDate(sc);
+    sc.nextLine(); 
 
-        System.out.print("Enter the release status (medicine not released/medicine released/pending): ");
-        String status = getValidStatus(sc);
+    
+    System.out.print("Enter the release date (YYYY-MM-DD): ");
+    String releaseDate = getValidReleaseDate(sc);
 
-        String medReleaseQry = "INSERT INTO medicinerelease (p_id, med_id, quantity, m_release, m_status) VALUES (?, ?, ?, ?, ?)";
-        conf.addRecord(medReleaseQry, Integer.toString(pid), Integer.toString(mid), Integer.toString(quantity), releaseDate, status);
+   
+    System.out.print("Enter the release status (medicine not released/medicine released/pending): ");
+    String status = getValidStatus(sc);
 
-        String updateStockQry = "UPDATE medicines SET m_stocks = m_stocks - ? WHERE med_id = ?";
-        conf.updateRecord(updateStockQry, Integer.toString(quantity), Integer.toString(mid));
+    
+    String medReleaseQuery = "INSERT INTO medicinerelease (a_id, med_id, quantity, m_release, m_status) VALUES (?, ?, ?, ?, ?)";
+    conf.addRecord(medReleaseQuery, Integer.toString(appointmentId), Integer.toString(medicineId), Integer.toString(quantity), releaseDate, status);
 
-        System.out.println("Medicine release added successfully!");
-    }
+    
+    String updateStockQuery = "UPDATE medicines SET m_stocks = m_stocks - ? WHERE med_id = ?";
+    conf.updateRecord(updateStockQuery, Integer.toString(quantity), Integer.toString(medicineId));
 
-    private int getValidPatientId(Scanner sc, config conf) {
-        int pid;
-        String sql = "SELECT p_id FROM patients WHERE p_id = ?";
+    System.out.println("Medicine release added successfully!");
+}
+
+
+    private int getValidAppointmentId(Scanner sc, config conf) {
+        int appointmentId;
+        String sql = "SELECT a_id FROM appointment WHERE a_id = ?";
         while (true) {
             if (sc.hasNextInt()) {
-                pid = sc.nextInt();
-                if (conf.getSingleValue(sql, pid) != 0) {
+                appointmentId = sc.nextInt();
+                if (conf.getSingleValue(sql, appointmentId) != 0) {
                     break;
                 } else {
-                    System.out.println("Patient does not exist, select again.");
+                    System.out.println("Appointment does not exist, please select again.");
                 }
             } else {
                 System.out.println("Invalid input, please enter a number.");
                 sc.next();
             }
         }
-        return pid;
+        return appointmentId;
     }
 
     private int getValidMedicineId(Scanner sc, config conf) {
@@ -193,7 +208,7 @@ public class MedicineRelease {
             if (status.equals("medicine not released") || status.equals("medicine released") || status.equals("pending")) {
                 break;
             } else {
-                System.out.println("Invalid status. Please enter 'medicine not released', 'medicine released', or 'pending':");
+                System.out.println(" Please enter 'medicine not released', 'medicine released', or 'pending':");
             }
         }
         return status;
@@ -201,62 +216,61 @@ public class MedicineRelease {
 
     private void viewMedRelease() {
         String qry = "SELECT * FROM medicinerelease";
-        String[] hrds = {"Release ID", "Patient ID", "Medicine ID", "Quantity", "Release Date", "Status"};
-        String[] clms = {"mr_id", "p_id", "med_id", "quantity", "m_release", "m_status"};
+        String[] hrds = {"Release ID", "Appointment ID", "Medicine ID", "Quantity", "Release Date", "Status"};
+        String[] clms = {"mr_id", "a_id", "med_id", "quantity", "m_release", "m_status"};
         config conf = new config();
         conf.viewRecords(qry, hrds, clms);
     }
 
-    private void updateMedRelease() {
-        Scanner sc = new Scanner(System.in);
-        config conf = new config();
+   private void updateMedRelease() {
+    Scanner sc = new Scanner(System.in);
+    config conf = new config();
 
-        System.out.print("Enter the ID of the medicine release record to update: ");
-        int releaseId = getValidReleaseId(sc, conf);
+    System.out.print("Enter the ID of the medicine release record to update: ");
+    int releaseId = getValidReleaseId(sc, conf);
+    
 
-        String msql = "SELECT med_id, m_name, m_stocks FROM medicines WHERE m_stocks > 0";
-        System.out.println("Available Medicines:");
-        System.out.printf("%-10s %-30s %-10s%n", "ID", "Medicine Name", "Stock");
-        System.out.println("-------------------------------------------");
-        conf.viewRecords(msql, new String[]{"ID", "Medicine Name", "Stock"}, new String[]{"med_id", "m_name", "m_stocks"});
+    
+    String status = getValidStatus(sc);
 
-        System.out.print("Enter the ID of the Medicine: ");
-        int mid = getValidMedicineId(sc, conf);
+    
+    String updateQry = "UPDATE medicinerelease SET m_status = ? WHERE mr_id = ?";
+    conf.updateRecord(updateQry, status, Integer.toString(releaseId));
 
-        System.out.print("Enter new quantity: ");
-        int quantity = getValidQuantity(sc, conf, mid);
+    System.out.println("Medicine release status updated successfully!");
+}
 
-        sc.nextLine();
 
-        System.out.print("Enter new release date (YYYY-MM-DD): ");
-        String releaseDate = getValidReleaseDate(sc);
-
-        System.out.print("Enter new status (medicine not released/medicine released/pending): ");
-        String status = getValidStatus(sc);
-
-        String updateQry = "UPDATE medicinerelease SET med_id = ?, quantity = ?, m_release = ?, m_status = ? WHERE mr_id = ?";
-        conf.updateRecord(updateQry, Integer.toString(mid), Integer.toString(quantity), releaseDate, status, Integer.toString(releaseId));
-
-        System.out.println("Medicine release record updated successfully!");
-    }
 
     private int getValidReleaseId(Scanner sc, config conf) {
-        int releaseId;
+        int id;
         String sql = "SELECT mr_id FROM medicinerelease WHERE mr_id = ?";
         while (true) {
             if (sc.hasNextInt()) {
-                releaseId = sc.nextInt();
-                if (conf.getSingleValue(sql, releaseId) != 0) {
+                id = sc.nextInt();
+                if (conf.getSingleValue(sql, id) != 0) {
                     break;
                 } else {
-                    System.out.println("Record does not exist, select again.");
+                    System.out.println("Record not found. Please enter a valid ID.");
                 }
             } else {
                 System.out.println("Invalid input, please enter a number.");
                 sc.next();
             }
         }
-        return releaseId;
+        return id;
+    }
+
+    private boolean getYesNoResponse(Scanner sc) {
+        String response;
+        while (true) {
+            response = sc.next().trim().toLowerCase();
+            if (response.equals("yes") || response.equals("no")) {
+                return response.equals("yes");
+            } else {
+                System.out.println("Invalid response. Please enter 'yes' or 'no':");
+            }
+        }
     }
 
     private void deleteMedRelease() {
@@ -266,8 +280,8 @@ public class MedicineRelease {
         System.out.print("Enter the ID of the medicine release record to delete: ");
         int releaseId = getValidReleaseId(sc, conf);
 
-        String deleteQry = "DELETE FROM medicinerelease WHERE mr_id = ?";
-        conf.deleteRecord(deleteQry, Integer.toString(releaseId));
+        String deleteQuery = "DELETE FROM medicinerelease WHERE mr_id = ?";
+        conf.deleteRecord(deleteQuery, Integer.toString(releaseId));
 
         System.out.println("Medicine release record deleted successfully!");
     }

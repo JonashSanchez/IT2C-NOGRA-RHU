@@ -2,10 +2,6 @@ package it2c.nogra.rhuas;
 
 import java.util.Scanner;
 
-/**
- *
- * @author
- */
 public class Patient {
     public void pRHU() {
         Scanner sc = new Scanner(System.in);
@@ -55,11 +51,26 @@ public class Patient {
                 case 5:
                     break;
             }
-
-            System.out.println("Do you want to continue? (yes/no)");
-            response = sc.next();
-
+            System.out.println("\n---------------------------");
+            response = getValidYesNoResponse(sc, "Do you want to continue? (yes/no)");
+            System.out.println("\n---------------------------");
         } while (response.equalsIgnoreCase("yes"));
+    }
+
+    private String getValidYesNoResponse(Scanner sc, String prompt) {
+        String response;
+        while (true) {
+            System.out.println(prompt);
+            response = sc.next();
+            if (response.equalsIgnoreCase("yes") || response.equalsIgnoreCase("no")) {
+                break;
+            } else {
+                System.out.println("\n---------------------------");
+                System.out.println("Invalid input, please enter 'yes' or 'no'.");
+                System.out.println("\n---------------------------");
+            }
+        }
+        return response;
     }
 
     public void addPatients() {
@@ -131,7 +142,7 @@ public class Patient {
 
         System.out.println("\n----------------------");
         while (true) {
-            System.out.println("Enter the new first name:");
+            System.out.print("Enter the new first name: ");
             ufname = sc.nextLine();
             if (ufname.matches("[a-zA-Z ]+")) {
                 break;
@@ -141,7 +152,7 @@ public class Patient {
 
         System.out.println("\n----------------------");
         while (true) {
-            System.out.println("Enter the new last name:");
+            System.out.print("Enter the new last name: ");
             ulname = sc.nextLine();
             if (ulname.matches("[a-zA-Z ]+")) {
                 break;
@@ -151,7 +162,7 @@ public class Patient {
 
         System.out.println("\n----------------------");
         while (true) {
-            System.out.println("Enter the new email:");
+            System.out.print("Enter the new email: ");
             uemail = sc.next();
             if (uemail.matches("\\w+@gmail\\.com")) {
                 break;
@@ -161,7 +172,7 @@ public class Patient {
 
         System.out.println("\n----------------------");
         while (true) {
-            System.out.println("Enter the new contact number:");
+            System.out.print("Enter the new contact number: ");
             ucontact = sc.next();
             if (ucontact.matches("\\d{11}")) {
                 break;
@@ -176,9 +187,10 @@ public class Patient {
     private int getValidPatientId(Scanner sc, config conf) {
         int id;
         while (true) {
-            System.out.println("Enter Patient ID:");
+            System.out.print("Enter Patient ID: ");
             if (sc.hasNextInt()) {
                 id = sc.nextInt();
+                sc.nextLine(); 
                 if (conf.getSingleValue("SELECT p_id FROM patients WHERE p_id=?", id) != 0) {
                     break;
                 } else {
@@ -186,7 +198,7 @@ public class Patient {
                 }
             } else {
                 System.out.println("Invalid input. Please enter a number.");
-                sc.next();
+                sc.next(); 
             }
         }
         return id;
@@ -197,13 +209,21 @@ public class Patient {
         config conf = new config();
 
         System.out.println("\n----------------------");
-        System.out.println("Enter Patient ID to delete:");
-        int id = sc.nextInt();
-
-        while (conf.getSingleValue("SELECT p_id FROM patients WHERE p_id=?", id) == 0) {
-            System.out.println("Selected ID doesn't exist.");
-            System.out.println("Select Patient ID Again:");
-            id = sc.nextInt();
+        int id;
+        while (true) {
+            System.out.print("Enter Patient ID to delete: ");
+            if (sc.hasNextInt()) {
+                id = sc.nextInt();
+                sc.nextLine(); 
+                if (conf.getSingleValue("SELECT p_id FROM patients WHERE p_id=?", id) != 0) {
+                    break;
+                } else {
+                    System.out.println("Selected ID doesn't exist.");
+                }
+            } else {
+                System.out.println("Invalid input. Please enter a number.");
+                sc.next(); 
+            }
         }
 
         String sqlDelete = "DELETE FROM patients WHERE p_id = ?";

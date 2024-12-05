@@ -63,7 +63,7 @@ public class IT2CNOGRARHUAS {
                 case 6:
                     System.out.println("\n---------------------------");
                     System.out.println("Exit Selected...type 'yes' to continue");
-                    String resp = sc.next();
+                    String resp = getValidYesNoResponse(sc, "Please enter 'yes' or 'no':");
                     if (resp.equalsIgnoreCase("yes")) {
                         exit = false;
                     }
@@ -71,5 +71,20 @@ public class IT2CNOGRARHUAS {
                     break;
             }
         } while (exit);
+    }
+
+    private static String getValidYesNoResponse(Scanner sc, String prompt) {
+        String response;
+        while (true) {
+            response = sc.next();
+            if (response.equalsIgnoreCase("yes") || response.equalsIgnoreCase("no")) {
+                break;
+            } else {
+                System.out.println("\n---------------------------");
+                System.out.println("Invalid input, " + prompt);
+                System.out.println("\n---------------------------");
+            }
+        }
+        return response;
     }
 }
